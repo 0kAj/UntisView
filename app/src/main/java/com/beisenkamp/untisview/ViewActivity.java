@@ -107,14 +107,14 @@ public class ViewActivity extends AppCompatActivity {
 
     private void showCodeInput(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        // Set up the input
+        // input einrichten 
         final EditText input = new EditText(this);
-        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        // Setze Passwort Texttyp
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         builder.setView(input);
 
         builder.setTitle(getString(R.string.enter_code_title));
-        // Set up the buttons
+        // Buttons einrichten
         builder.setPositiveButton("OK", (dialog, which) -> {
             pw_input = input.getText().toString();
             checkPw();
