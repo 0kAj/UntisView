@@ -13,8 +13,11 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.beisenkamp.untisview.res.DeviceAdmin;
+import com.beisenkamp.untisview.res.SettingsManager;
+import com.beisenkamp.untisview.res.UserSettings;
 
 import java.util.concurrent.ExecutionException;
 
@@ -56,12 +59,12 @@ public class MainActivity extends AppCompatActivity {
         Button setting = findViewById(R.id.settings_btn);
         setting.setOnClickListener(view -> {
             // öffne Einstellungen
-            Intent settings_intent = new Intent(Settings.ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS);
+            Intent settings_intent = new Intent(Settings.ACTION_SETTINGS);
             startActivity(settings_intent);
         });
         Button other_app = findViewById(R.id.other_app_btn);
         other_app.setOnClickListener(view -> {
-            // Starte Homescreen
+            // Starte App Auswahlmenü
             Intent startMain = new Intent(Intent.ACTION_MAIN);
             startMain.addCategory(Intent.CATEGORY_HOME);
             startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -74,14 +77,42 @@ public class MainActivity extends AppCompatActivity {
             boolean active = deviceManger.isAdminActive(new ComponentName(this, DeviceAdmin.class));
             if (active) {
                 // sperre Gerät
+                UserSettings settings = SettingsManager.getUserSettings(this);
+                settings.setApp_unlocked(false);
+                SettingsManager.updateUserSettings(settings,this);
+
                 deviceManger.lockNow();
             }
             else {
-                Intent i = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-                i.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,"Nach Änderung der Geräte-Administratoren ist ein manueller Neustart erforderlich");
-                startActivity(i);
+                Toast.makeText(this, "Aktiviere " + this.getString(R.string.app_name) + " als Geräteadministrator", Toast.LENGTH_LONG).show();
+                startActivity(new Intent().setComponent(new ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings")));
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Lade UserSettings
+        UserSettings settings = SettingsManager.getUserSettings(this);
+
+        if(!settings.isApp_unlocked()){
+            // Simuliere klick für close_btn
+            findViewById(R.id.close_btn).callOnClick();
+            Toast.makeText(this, "Nicht autorisierter Zugriff...", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        onResume();
     }
 
     public void registerScreenLockStateBrodcastReceiver(Context context){

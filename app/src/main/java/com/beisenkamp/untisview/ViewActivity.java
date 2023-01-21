@@ -18,6 +18,9 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.beisenkamp.untisview.res.SettingsManager;
+import com.beisenkamp.untisview.res.UserSettings;
+
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -28,12 +31,17 @@ public class ViewActivity extends AppCompatActivity {
     boolean canLeave = false;
     String pw_input = "";
 
+    UserSettings settings;
+
     @SuppressLint({"SetJavaScriptEnabled", "WakelockTimeout"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // lade Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_activity);
+
+        //Lade Settings
+        settings = SettingsManager.getUserSettings(this);
 
         // verstecke Actionbar, wenn verfügbar
         Objects.requireNonNull(getSupportActionBar()).hide();
@@ -107,20 +115,25 @@ public class ViewActivity extends AppCompatActivity {
 
     private void showCodeInput(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        // Set up the input
+        // input einrichten
         final EditText input = new EditText(this);
-        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        // Setze Passwort Texttyp
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         builder.setView(input);
 
         builder.setTitle(getString(R.string.enter_code_title));
-        // Set up the buttons
+        // Buttons einrichten
         builder.setPositiveButton("OK", (dialog, which) -> {
             pw_input = input.getText().toString();
             checkPw();
             if (canLeave) {
                 Toast.makeText(ViewActivity.this, getString(R.string.unlocked_msg), Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(ViewActivity.this, MainActivity.class));
+                //startActivity(new Intent(ViewActivity.this, MainActivity.class));
+                // Schalte Android frei
+                settings.setApp_unlocked(true);
+                SettingsManager.updateUserSettings(settings,this);
+                // beende App
+                finish();
             }
             else {
                 AlertDialog.Builder log = new AlertDialog.Builder(ViewActivity.this);
