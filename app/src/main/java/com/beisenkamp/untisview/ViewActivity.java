@@ -146,7 +146,7 @@ public class ViewActivity extends AppCompatActivity {
                 log.show();
             }
         });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.setNegativeButton("Abbrechen", (dialog, which) -> dialog.cancel());
         builder.show();
     }
 }

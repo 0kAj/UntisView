@@ -6,9 +6,12 @@
     <string name="wrong_pw_msg">Du hast ein falsches Passwort eingegeben. Admin wurde kontaktiert</string>
     <string name="unlocked_msg">Passwort korrekt</string>
     <string name="enter_code_title">Passwort eingeben:</string>
-    <string name="relock_App_msg">Drücke die \'Home\'-Taste, um das Gerät zu sperren</string>
     <string name="close">Schließen</string>
-    <string name="untis_view_ist_aktiv">Untis View ist aktiv</string>
+    <string name="state_active">Untis View ist aktiv</string>
     <string name="settings">Einstellungen</string>
     <string name="open_other_app">andere App öffnen</string>
+    <string name="state_setdefaultinput">Lege das Keyboard als Standard fest!</string>
+    <string name="state_setinputenabled">Aktiviere das Keyboard!</string>
+    <string name="subtype_de_DE">Deutsch (DE)</string>
+    <string name="state_needdeviceadmin">Lege App als Geräteadmin fest</string>
 </resources>

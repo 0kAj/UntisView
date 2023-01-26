@@ -4,6 +4,8 @@ import android.app.admin.DeviceAdminReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.beisenkamp.untisview.R;
+
 public class DeviceAdmin extends DeviceAdminReceiver {
 
     @Override
@@ -13,7 +15,7 @@ public class DeviceAdmin extends DeviceAdminReceiver {
 
     @Override
     public CharSequence onDisableRequested(Context context, Intent intent) {
-        return "admin_receiver_status_disable_warning";
+        return context.getString(R.string.app_name) + " funktioniert dann nicht mehr richtig";
     }
 
     @Override
