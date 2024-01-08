@@ -8,8 +8,11 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
+import android.os.BatteryManager;
 import android.os.Build;
+import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
@@ -19,6 +22,11 @@ import android.widget.Toast;
 import com.beisenkamp.untisview.res.DeviceAdmin;
 import com.beisenkamp.untisview.res.SettingsManager;
 import com.beisenkamp.untisview.res.UserSettings;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.io.InputStreamReader;
+import java.net.URL;
 
 public class Tec {
 
@@ -47,9 +55,9 @@ public class Tec {
         if(!settings.isApp_unlocked()){
             // Simuliere klick für close_btn
             activity.findViewById(R.id.close_btn).callOnClick();
-            try {
-                Toast.makeText(activity, "Nicht autorisierter Zugriff...", Toast.LENGTH_SHORT).show();
-            }catch (Exception ignored){}
+//            try {
+//                Toast.makeText(activity, "Nicht autorisierter Zugriff...", Toast.LENGTH_SHORT).show();
+//            }catch (Exception ignored){}
         }
     }
 
@@ -88,5 +96,91 @@ public class Tec {
         }
         ((TextView) activity.findViewById(R.id.state_tv)).setText(R.string.state_active);
         return true;
+    }
+
+    public static void updateRefresh(Activity context){
+
+        // Stricedmode needed for JsonAsyncReader
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        UserSettings settings = SettingsManager.getUserSettings(context);
+
+        String url = context.getString(R.string.server_url) + context.getString(R.string.server_password_route);
+
+        InputStreamReader reader = null;
+        try {
+            reader = new InputStreamReader(new URL(url).openStream());
+
+            JsonObject property = new JsonParser().parse(reader).getAsJsonObject().get("data").getAsJsonObject();
+            int refresh_rate = property.get("refreshRate").getAsInt();
+
+            settings.setAppRefreshRate(refresh_rate);
+            SettingsManager.updateUserSettings(settings, context);
+        } catch (Exception e) {
+            e.printStackTrace();
+            settings.setAppRefreshRate(context.getResources().getInteger(R.integer.refresh_per_min));
+            SettingsManager.updateUserSettings(settings, context);
+        }
+    }
+
+    public static void updatePasswort(Activity context){
+
+        // Stricedmode needed for JsonAsyncReader
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        UserSettings settings = SettingsManager.getUserSettings(context);
+
+        String url = context.getString(R.string.server_url) + context.getString(R.string.server_password_route);
+
+        InputStreamReader reader = null;
+        try {
+            reader = new InputStreamReader(new URL(url).openStream());
+
+            JsonObject property = new JsonParser().parse(reader).getAsJsonObject().get("data").getAsJsonObject();
+            String pw = property.get("password").getAsString();
+
+            settings.setAppUnlockPassword(pw);
+            SettingsManager.updateUserSettings(settings, context);
+        } catch (Exception e) {
+            e.printStackTrace();
+            settings.setAppUnlockPassword(context.getString(R.string.password));
+            SettingsManager.updateUserSettings(settings, context);
+        }
+    }
+
+    public static float getCharge(Context context) {
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = context.registerReceiver(null, filter);
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        float charge = level * 100 / (float)scale;
+        Toast.makeText(context, charge + "% Akkuladung", Toast.LENGTH_SHORT).show();
+
+        return charge;
+    }
+
+    public static void lockPlus(Activity context) {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        UserSettings settings = SettingsManager.getUserSettings(context);
+
+        String url = context.getString(R.string.server_url) + context.getString(R.string.server_password_route);
+
+        InputStreamReader reader = null;
+        try {
+            reader = new InputStreamReader(new URL(url).openStream());
+
+            JsonObject property = new JsonParser().parse(reader).getAsJsonObject().get("data").getAsJsonObject();
+            boolean lockPlus = property.get("lockPlus").getAsBoolean();
+
+            settings.setLockPlus(lockPlus);
+            SettingsManager.updateUserSettings(settings, context);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

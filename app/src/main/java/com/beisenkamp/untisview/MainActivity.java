@@ -1,13 +1,10 @@
 package com.beisenkamp.untisview;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -15,7 +12,6 @@ import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
@@ -23,14 +19,11 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.beisenkamp.untisview.res.CustomViewGroup;
-import com.beisenkamp.untisview.res.DeviceAdmin;
 import com.beisenkamp.untisview.res.SettingsManager;
 import com.beisenkamp.untisview.res.UserSettings;
-
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -64,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
                 if (!Settings.canDrawOverlays(this)) {
-                    Toast.makeText(this, "Please give my app this permission!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Please give UntisView this permission!", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
                     startActivityForResult(intent, 1);
                 } else {

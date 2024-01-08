@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".ViewActivity">
 
+    <ImageView
+        android:id="@+id/screen_saver_iv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/beisenkamp_logo_1024x284" />
+
     <WebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
@@ -13,6 +23,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+    </WebView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">UntisView</string>
     <string name="password">1234</string>
-    <string name="server_url">http://10.16.1.34:8000/print?sn=</string>
+    <string name="server_url">http://10.16.1.34:3000</string>
+    <string name="server_print_route">/print?sn=</string>
+    <string name="server_password_route">/print/options</string>
     <string name="wrong_pw_title">Falsches Passwort</string>
-    <string name="wrong_pw_msg">Du hast ein falsches Passwort eingegeben. Admin wurde kontaktiert</string>
+    <string name="wrong_pw_msg">Du hast ein falsches Passwort eingegeben. Admin wurde kontaktiert.</string>
     <string name="unlocked_msg">Passwort korrekt</string>
     <string name="enter_code_title">Passwort eingeben:</string>
     <string name="close">Schließen</string>
@@ -14,4 +16,5 @@
     <string name="state_setinputenabled">Aktiviere das Keyboard!</string>
     <string name="subtype_de_DE">Deutsch (DE)</string>
     <string name="state_needdeviceadmin">Lege App als Geräteadmin fest</string>
+    <string name="param_akku">&amp;c=</string>
 </resources>

@@ -4,10 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.View;
@@ -16,6 +14,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.beisenkamp.untisview.res.SettingsManager;
@@ -40,20 +39,23 @@ public class ViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_activity);
 
+        Tec.updatePasswort(this);
+
         //Lade Settings
         settings = SettingsManager.getUserSettings(this);
 
         // verstecke Actionbar, wenn verfügbar
         Objects.requireNonNull(getSupportActionBar()).hide();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
 
         // verhindern, dass sich das Gerät ausschatet
         // Bildschirm am ausschalten verhindern
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        // CPU am ausschalten verhindern
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
-                "MyApp::MyWakelockTag");
-        wakeLock.acquire();
+//        // CPU am ausschalten verhindern
+//        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+//        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
+//                "MyApp::MyWakelockTag");
+//        wakeLock.acquire();
 
 
         // Aktiviere WLAN
@@ -67,8 +69,16 @@ public class ViewActivity extends AppCompatActivity {
         settings.setDomStorageEnabled(true);
         webView.setWebViewClient(new WebViewClient());
 
+        // bereite screensafer vor
+        ImageView screen_saver_iv = findViewById(R.id.screen_saver_iv);
+
+        // lade lockPlus
+        Tec.lockPlus(this);
+        setupLockPlus();
+
+
         // lade URL
-        webView.loadUrl(getString(R.string.server_url) + Tec.getSerialNumber());
+        webView.loadUrl(getString(R.string.server_url) + getString(R.string.server_print_route) + Tec.getSerialNumber() + getString(R.string.param_akku) + Tec.getCharge(this));
 
         // setze Timerlogik für das Reloaden des Webviews
         timer = new Timer();
@@ -76,7 +86,7 @@ public class ViewActivity extends AppCompatActivity {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                runOnUiThread(() ->{
+                runOnUiThread(() -> {
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         settings.setMixedContentMode(0);
                         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
@@ -85,11 +95,27 @@ public class ViewActivity extends AppCompatActivity {
                     } else {
                         webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
                     }
+                    Tec.updateRefresh(ViewActivity.this);
                     webView.setSystemUiVisibility(WebView.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
                     webView.reload();
                 });
             }
-        }, 0, 60000L / getResources().getInteger(R.integer.refresh_per_min)); // 1 min / refresh_per_min
+        }, 0, 1000L * SettingsManager.getUserSettings(ViewActivity.this).getAppRefreshRate()); // refresh_rate (in Sekunden)
+    }
+
+    private void setupLockPlus(){
+        setupLockPlus(false);
+    }
+
+    private void setupLockPlus(boolean unlock) {
+        if(SettingsManager.getUserSettings(this).isLockPlus() && !unlock){
+            findViewById(R.id.webview).setVisibility(View.INVISIBLE);
+            findViewById(R.id.screen_saver_iv).setVisibility(View.VISIBLE);
+        }
+        else {
+            findViewById(R.id.webview).setVisibility(View.VISIBLE);
+            findViewById(R.id.screen_saver_iv).setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -108,9 +134,12 @@ public class ViewActivity extends AppCompatActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
-
+    
     private void checkPw(){
-        canLeave = pw_input.equals(getString(R.string.password));
+        // Check pw
+//        canLeave = pw_input.equals(getString(R.string.password));
+        settings = SettingsManager.getUserSettings(this);
+        canLeave = pw_input.equals(settings.getAppUnlockPassword());
     }
 
     private void showCodeInput(){
@@ -129,11 +158,16 @@ public class ViewActivity extends AppCompatActivity {
             if (canLeave) {
                 Toast.makeText(ViewActivity.this, getString(R.string.unlocked_msg), Toast.LENGTH_SHORT).show();
                 //startActivity(new Intent(ViewActivity.this, MainActivity.class));
-                // Schalte Android frei
-                settings.setApp_unlocked(true);
-                SettingsManager.updateUserSettings(settings,this);
-                // beende App
-                finish();
+                if(SettingsManager.getUserSettings(this).isLockPlus()) {
+                    setupLockPlus(true);
+                }
+                else {
+                    // Schalte Android frei
+                    settings.setApp_unlocked(true);
+                    SettingsManager.updateUserSettings(settings, this);
+                    // beende App
+                    finish();
+                }
             }
             else {
                 AlertDialog.Builder log = new AlertDialog.Builder(ViewActivity.this);
